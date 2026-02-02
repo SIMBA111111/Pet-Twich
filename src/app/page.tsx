@@ -19,6 +19,11 @@ export default function Home() {
     try {
       setStatus("Захват экрана...");
       
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      console.log('devices ===== ', devices); 
+
+      const monitorAudio = devices.find((dev: any) => dev.label === 'LG ULTRAGEAR (NVIDIA High Definition Audio)')
+
       // Запрашиваем доступ к экрану и микрофону
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
@@ -26,11 +31,7 @@ export default function Home() {
           width: { ideal: 1280, max: 1920 },
           height: { ideal: 720, max: 1080 }
         },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
-        }
+        audio: true
       });
 
       // Запрашиваем доступ к микрофону отдельно для лучшего качества
@@ -41,6 +42,10 @@ export default function Home() {
           autoGainControl: true
         }
       });
+
+      console.log('screenStream = ', screenStream);
+      console.log('micStream = ', micStream);
+      
 
       // Объединяем потоки
       const combinedStream = new MediaStream([
@@ -63,6 +68,9 @@ export default function Home() {
     }
   };
 
+  console.log('stream = ', stream);
+  
+
   // Создание трансляции на сервере
   const createStream = async () => {
     try {
@@ -83,7 +91,7 @@ export default function Home() {
       
       if (data.success) {
         setStreamId(data.streamId);
-        setViewerUrl(`http://localhost:8080/viewer/${data.streamId}`);
+        setViewerUrl(`http://localhost:3000/streams/${data.streamId}`);
         setStatus("Трансляция создана");
         
         // Подключаемся к WebSocket

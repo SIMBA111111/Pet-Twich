@@ -43,8 +43,8 @@ export default function Home() {
         }
       });
 
-      console.log('screenStream = ', screenStream);
-      console.log('micStream = ', micStream);
+      // console.log('screenStream = ', screenStream);
+      // console.log('micStream = ', micStream);
       
 
       // Объединяем потоки
@@ -107,6 +107,8 @@ export default function Home() {
 
   // Подключение к WebSocket
   const connectWebSocket = (streamId: string) => {
+    console.log('streamId = ', streamId);
+    
     const ws = new WebSocket(`ws://localhost:8080/ws/${streamId}`);
     
     ws.onopen = () => {

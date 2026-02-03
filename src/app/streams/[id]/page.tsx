@@ -29,6 +29,12 @@ export default function WatchPage() {
         }
     }, [id])
 
+    useEffect(() => {
+        fetch(BACKEND_URL + `/api/streams/${id}`).then((data: any) => {
+                console.log(data);
+            })
+    }, [])
+
     const streamUrl = `${BACKEND_URL}/streams/${id}/index.m3u8`
 
     return (

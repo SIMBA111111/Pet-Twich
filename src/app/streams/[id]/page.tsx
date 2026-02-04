@@ -11,6 +11,7 @@ export default function WatchPage() {
     const { id } = useParams()
     const [duration, setDuration] = useState(0)
     const eventSourceRef = useRef<EventSource | null>(null)
+    const webSocketRef = useRef<WebSocket | null>(null)
 
     useEffect(() => {
         const es = new EventSource(`http://localhost:8080/api/streams/${id}/time`)
@@ -32,7 +33,25 @@ export default function WatchPage() {
     useEffect(() => {
         fetch(BACKEND_URL + `/api/streams/${id}`).then((data: any) => {
                 console.log(data);
-            })
+        })
+
+        const ws = new WebSocket(`ws://localhost:8080/ws/streams/${id}`)
+        ws.onopen = () => {
+            console.log('Юзер подключен к серверу');
+        }
+        ws.onclose = () => {
+            console.log('Юзер отключился от трансляции');
+        }
+        ws.onerror = (error) => {
+            console.error("Юзер WebSocket ошибка:", error);
+        };
+
+        webSocketRef.current = ws
+
+        return () => {
+            ws.close()
+        }
+
     }, [])
 
     const streamUrl = `${BACKEND_URL}/streams/${id}/index.m3u8`

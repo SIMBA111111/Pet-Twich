@@ -19,11 +19,6 @@ export default function Home() {
     try {
       setStatus("Захват экрана...");
       
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      console.log('devices ===== ', devices); 
-
-      const monitorAudio = devices.find((dev: any) => dev.label === 'LG ULTRAGEAR (NVIDIA High Definition Audio)')
-
       // Запрашиваем доступ к экрану и микрофону
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: {

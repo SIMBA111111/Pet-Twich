@@ -9,7 +9,8 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 export default function WatchPage() {
     const { id } = useParams()
-    const [duration, setDuration] = useState(0)
+    const [duration, setDuration] = useState<number>(0)
+    const [viewersCount, setViewersCount] = useState<number>(0)
     const eventSourceRef = useRef<EventSource | null>(null)
     const webSocketRef = useRef<WebSocket | null>(null)
 
@@ -20,7 +21,7 @@ export default function WatchPage() {
         es.onmessage = (event) => {
             const data = JSON.parse(event.data)
             if (data.type === 'ffmpeg_time') {
-                console.log('Текущее время стрима:', data.time)
+                // console.log('Текущее время стрима:', data.time)
                 setDuration(data.time)
             }
         }
@@ -46,6 +47,18 @@ export default function WatchPage() {
             console.error("Юзер WebSocket ошибка:", error);
         };
 
+        ws.onmessage = (event: MessageEvent) => {
+            try {
+                const data = JSON.parse(event.data)
+
+                if (data.type = 'viewersInfo') {
+                    setViewersCount(data.data)
+                }
+            } catch (error) {
+                console.error('Ошибка при получении сообщения от сокет сервера: ', error);
+            }
+        }
+
         webSocketRef.current = ws
 
         return () => {
@@ -64,6 +77,7 @@ export default function WatchPage() {
                     <p>Смотрите прямую трансляцию в реальном времени</p>
                 </div>
                 <Player playlistUrl={streamUrl} isLiveStream={true} duration={duration} />
+                <div>кол-во зрителей: {viewersCount}</div>
             </div>
         </div>
     )

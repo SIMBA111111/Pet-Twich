@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import styles from './styles.module.css'
 import { Player } from '../../../../Player/src/component'
 import { useParams } from 'next/navigation'
@@ -102,7 +102,7 @@ export default function WatchPage() {
                 <ul id='chat' className={styles.chat}>
                     <li className={styles.chatMessage}>первое сообщение</li>
                 </ul>
-                <input type="text" onChange={(e: React.ChangeEvent) => { messageRef.current = e.target.value }}/>
+                <input type="text" onChange={(e: React.ChangeEvent<HTMLInputElement>) => { messageRef.current = e.target.value }}/>
                 <button onClick={handleSubmitMessage}>Отправить сообщение</button>
             </div>
         </div>

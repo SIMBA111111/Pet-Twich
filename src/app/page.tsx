@@ -290,7 +290,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className={styles.infoCard}>
+          {/* <div className={styles.infoCard}>
             <h3>⚙️ Настройки</h3>
             <div className={styles.settings}>
               <div className={styles.setting}>
@@ -311,7 +311,7 @@ export default function Home() {
                 </select>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </main>
 

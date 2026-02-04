@@ -13,6 +13,7 @@ export default function WatchPage() {
     const [viewersCount, setViewersCount] = useState<number>(0)
     const eventSourceRef = useRef<EventSource | null>(null)
     const webSocketRef = useRef<WebSocket | null>(null)
+    const messageRef = useRef<string>('')
 
     useEffect(() => {
         const es = new EventSource(`http://localhost:8080/api/streams/${id}/time`)
@@ -50,9 +51,19 @@ export default function WatchPage() {
         ws.onmessage = (event: MessageEvent) => {
             try {
                 const data = JSON.parse(event.data)
-
-                if (data.type = 'viewersInfo') {
+                console.log(data);
+                
+                if (data.type === "viewersInfo") {
+                    console.log('кол-во зрилов');
                     setViewersCount(data.data)
+ 
+                } else if (data.type === "chatMessage") {
+                    console.log('Новое сообщение: ', data.data);
+                    const chatList = document.getElementById('chat')
+                    const newMessageElement = document.createElement('li')
+                    newMessageElement.textContent = data.data
+                    newMessageElement.className = 'chatMessage'
+                    chatList?.appendChild(newMessageElement)
                 }
             } catch (error) {
                 console.error('Ошибка при получении сообщения от сокет сервера: ', error);
@@ -67,6 +78,14 @@ export default function WatchPage() {
 
     }, [])
 
+    const handleSubmitMessage = () => {
+        try {
+            webSocketRef.current?.send(JSON.stringify({type: 'chatMessage', streamId: id, message: messageRef.current}))
+        } catch (error) {
+            console.log('Не отправилось сообщение в чат: ', error);
+        }    
+    }
+
     const streamUrl = `${BACKEND_URL}/streams/${id}/index.m3u8`
 
     return (
@@ -78,6 +97,13 @@ export default function WatchPage() {
                 </div>
                 <Player playlistUrl={streamUrl} isLiveStream={true} duration={duration} />
                 <div>кол-во зрителей: {viewersCount}</div>
+            </div>
+            <div className={styles.chatContainer}>
+                <ul id='chat' className={styles.chat}>
+                    <li className={styles.chatMessage}>первое сообщение</li>
+                </ul>
+                <input type="text" onChange={(e: React.ChangeEvent) => { messageRef.current = e.target.value }}/>
+                <button onClick={handleSubmitMessage}>Отправить сообщение</button>
             </div>
         </div>
     )

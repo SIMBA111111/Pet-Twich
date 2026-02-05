@@ -1,6 +1,6 @@
 'use client'
 
-import { ChangeEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './styles.module.css'
 import { Player } from '../../../../Player/src/component'
 import { useParams } from 'next/navigation'
@@ -11,6 +11,7 @@ export default function WatchPage() {
     const { id } = useParams()
     const [duration, setDuration] = useState<number>(0)
     const [viewersCount, setViewersCount] = useState<number>(0)
+    const [currentStream, setCurrentStream] = useState<any>(null)
     const eventSourceRef = useRef<EventSource | null>(null)
     const webSocketRef = useRef<WebSocket | null>(null)
     const messageRef = useRef<string>('')
@@ -34,8 +35,9 @@ export default function WatchPage() {
 
     useEffect(() => {
         fetch(BACKEND_URL + `/api/streams/${id}`).then((data: any) => {
-                console.log(data);
-        })
+            return data.json()
+        }).then((data) => { console.log(data);
+         setCurrentStream(data) })
 
         const ws = new WebSocket(`ws://localhost:8080/ws/streams/${id}`)
         ws.onopen = () => {
@@ -86,7 +88,9 @@ export default function WatchPage() {
         }    
     }
 
-    const streamUrl = `${BACKEND_URL}/streams/${id}/index.m3u8`
+    if (!currentStream) {
+        return 'wait'
+    }
 
     return (
         <div className={styles.pageWrapper}>
@@ -95,7 +99,7 @@ export default function WatchPage() {
                     <h1>👁️ Просмотр трансляции</h1>
                     <p>Смотрите прямую трансляцию в реальном времени</p>
                 </div>
-                <Player playlistUrl={streamUrl} isLiveStream={true} duration={duration} />
+                <Player playlistUrl={currentStream.streamUrl} isLiveStream={true} duration={duration} />
                 <div>кол-во зрителей: {viewersCount}</div>
             </div>
             <div className={styles.chatContainer}>

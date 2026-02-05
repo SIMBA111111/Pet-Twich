@@ -18,7 +18,6 @@ export const getWsViewersCount = async (streamId: string, setViewersCount: Dispa
   ws.onmessage = (event: MessageEvent) => {
     try {
       const data = JSON.parse(event.data);
-      console.log(data);
 
       if (data.type === 'viewersInfo') {
         setViewersCount(data.data);

@@ -5,10 +5,12 @@ import styles from "./page.module.css";
 
 export default function Home() {
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [activeStream, setActiveStream] = useState<any>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [status, setStatus] = useState<string>("Ожидание...");
   const [streamId, setStreamId] = useState<string>("");
   const [viewerUrl, setViewerUrl] = useState<string>("");
+  const [isActiveModal, setIsActiveModal] = useState<boolean>(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const webSocketRef = useRef<WebSocket | null>(null);
@@ -24,13 +26,11 @@ export default function Home() {
         return
       }
 
-      
+      const { notStopedStream } = await res.json()
 
-      const { streamId } = await res.json()
-      console.log('streamId = ', streamId);
-
-      // startCapture()
-      await restartStreaming(streamId)
+      setActiveStream(notStopedStream)
+      setStreamId(notStopedStream.id)
+      setIsActiveModal(true)
     }
 
     handleGetMyActiveStream() 
@@ -214,6 +214,7 @@ export default function Home() {
   
 
   const restartStreaming = async (streamId: string) => {
+    
     let combinedStream
 
     if (!stream) {
@@ -226,6 +227,7 @@ export default function Home() {
 
       if (!combinedStream) return;
 
+      setIsActiveModal(false)
       setStatus("Настройка трансляции...");
 
       console.log('погнали гнать трафик');
@@ -270,7 +272,9 @@ export default function Home() {
       webSocketRef.current.close();
     }
     
-    await fetch(`http://localhosy:8080/api/stop/${streamId}`)
+    const res = await fetch(`http://localhost:8080/api/streams/stop/${streamId}`)
+    
+    setIsActiveModal(false)
 
     // Останавливаем все треки
     if (screenStreamRef.current) {
@@ -291,7 +295,8 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.container}>
+    <>
+    <div id="container" className={isActiveModal ? `${styles.container} ${styles.overlay}` : `${styles.container}`}>
       <header className={styles.header}>
         <h1>🎥 Live Stream Studio</h1>
         <p>Транслируйте свой экран в реальном времени</p>
@@ -416,5 +421,19 @@ export default function Home() {
         <p>Live Stream Studio • Трансляция в реальном времени</p>
       </footer>
     </div>
+
+    {isActiveModal && (
+      <div id='modalContainer' className={styles.modalOverlay}>
+        <div className={styles.modalContent}>
+          <h3 className={styles.modalTitle}>У вас есть прерванный стрим</h3>
+          <p className={styles.streamInfo}>незаконченный стрим: {activeStream.title}</p>
+          <div className={styles.buttonContainer}>
+            <button className={styles.stopButton} onClick={stopStreaming}>Остановить стрим</button>
+            <button className={styles.resumeButton} onClick={(e: React.MouseEvent) => restartStreaming(activeStream.id)}>Продолжить стрим</button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

@@ -16,7 +16,7 @@ export default function WatchPage() {
     const messageRef = useRef<string>('')
 
     useEffect(() => {
-        const es = new EventSource(`http://localhost:8080/api/streams/${id}/time`)
+        const es = new EventSource(`http://localhost:8080/api/streams/time/${id}`)
         eventSourceRef.current = es
 
         es.onmessage = (event) => {

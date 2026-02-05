@@ -14,6 +14,28 @@ export default function Home() {
   const webSocketRef = useRef<WebSocket | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
 
+  useEffect(() => {
+    const handleGetMyActiveStream = async () => {
+      const res = await fetch('http://localhost:8080/api/streams/my')
+      // console.log(res);
+      
+      if(res.status === 404) {
+        console.log('нет стрима');
+        return
+      }
+
+      
+
+      const { streamId } = await res.json()
+      console.log('streamId = ', streamId);
+
+      // startCapture()
+      await restartStreaming(streamId)
+    }
+
+    handleGetMyActiveStream() 
+  }, [])
+
   // Захват экрана
   const startCapture = async () => {
     try {
@@ -52,10 +74,14 @@ export default function Home() {
       setStream(combinedStream);
       setStatus("Экран захвачен");
 
+
       // Обработка остановки трансляции через браузер
-      screenStream.getVideoTracks()[0].onended = () => {
-        stopStreaming();
+      screenStream.getVideoTracks()[0].onended = async () => {
+        await stopStreaming();
       };
+
+      return combinedStream
+
 
     } catch (error: any) {
       console.error("Ошибка захвата экрана:", error);
@@ -63,8 +89,26 @@ export default function Home() {
     }
   };
 
-  console.log('stream = ', stream);
-  
+
+
+  const restartStream = async (streamId: string) => {
+    try {
+      setStatus("Рестарт трансляции...");      
+      
+      setStreamId(streamId);
+      setViewerUrl(`http://localhost:3000/streams/${streamId}`);
+      setStatus("Трансляция создана");
+        
+        // Подключаемся к WebSocket
+      connectWebSocket(streamId);
+      console.log('restartStream');
+      
+    } catch (error: any) {
+      console.error("Ошибка создания трансляции:", error);
+      setStatus(`Ошибка: ${error.message}`);
+    }
+  };
+
 
   // Создание трансляции на сервере
   const createStream = async () => {
@@ -83,6 +127,8 @@ export default function Home() {
       });
 
       const data = await response.json();
+      console.log('created stream: ', data);
+      
       
       if (data.success) {
         setStreamId(data.streamId);
@@ -164,9 +210,58 @@ export default function Home() {
       setStatus(`Ошибка: ${error.message}`);
     }
   };
+  console.log('stream +++ ', stream);
+  
+
+  const restartStreaming = async (streamId: string) => {
+    let combinedStream
+
+    if (!stream) {
+      combinedStream = await startCapture();
+    }
+
+    try {
+      restartStream(streamId)
+      console.log('REstartStreaming: ', stream);
+
+      if (!combinedStream) return;
+
+      setStatus("Настройка трансляции...");
+
+      console.log('погнали гнать трафик');
+      
+
+      // Создаем MediaRecorder с настройками для WebRTC
+      const mediaRecorder = new MediaRecorder(combinedStream, {
+        mimeType: 'video/webm;codecs=vp8,opus',
+        videoBitsPerSecond: 2500000, // 2.5 Mbps
+        audioBitsPerSecond: 128000   // 128 Kbps
+      });
+
+      mediaRecorderRef.current = mediaRecorder;
+
+      // Отправка данных на сервер
+      mediaRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0 && webSocketRef.current?.readyState === WebSocket.OPEN) {
+          // Конвертируем Blob в ArrayBuffer для отправки
+          const arrayBuffer = await event.data.arrayBuffer();
+          webSocketRef.current.send(arrayBuffer);
+        }
+      };
+
+      // Начать запись с интервалом 1 секунда
+      mediaRecorder.start(1000);
+      setIsStreaming(true);
+      setStatus("Идет трансляция");
+
+    } catch (error: any) {
+      console.error("Ошибка начала трансляции:", error);
+      setStatus(`Ошибка: ${error.message}`);
+    }
+  };
 
   // Остановить трансляцию
-  const stopStreaming = () => {
+  const stopStreaming = async () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
@@ -175,6 +270,8 @@ export default function Home() {
       webSocketRef.current.close();
     }
     
+    await fetch(`http://localhosy:8080/api/stop/${streamId}`)
+
     // Останавливаем все треки
     if (screenStreamRef.current) {
       screenStreamRef.current.getTracks().forEach(track => track.stop());

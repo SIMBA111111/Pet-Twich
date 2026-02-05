@@ -1,0 +1,32 @@
+.playerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Заголовок */
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.viewer-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.headerH1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #60a5fa, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+} 

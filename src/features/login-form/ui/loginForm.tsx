@@ -11,19 +11,6 @@ export const LoginForm = () => {
             password: '',
         }
     )
-
-    useEffect(() => {
-        const handle = async () => {
-            await fetch('http://localhost:8080/api/streams', {
-                credentials: 'include'
-            })
-        }
-
-        handle()
-    }, [])
-
-    
-    // console.log(document.cookie);
     
     return (
         <form onSubmit={(e: React.SubmitEvent<HTMLFormElement>) => login(e, loginData)} >

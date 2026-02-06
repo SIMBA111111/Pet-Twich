@@ -1,13 +1,16 @@
 'use client'
 
 import { useRouter } from 'next/navigation';
+import { getCookie } from 'cookies-next';
+
 import styles from './styles.module.css';
+import { useEffect } from 'react';
 
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 export default function StreamsList() {
-    const router = useRouter()
+  const router = useRouter()
 
 
   const viewStreams = () => {
@@ -21,6 +24,23 @@ export default function StreamsList() {
         alert('Ошибка получения списка трансляций');
       });
   };
+
+  useEffect(() => {
+    async function fetchUserData() {
+      const userDataString = await getCookie('userData'); // string или undefined
+      
+      if (userDataString) {
+        const decodedCookie = decodeURIComponent(userDataString)
+        const userData = JSON.parse(decodedCookie);
+        console.log('User Data:', userData);
+      } else {
+        console.log('Кука не найдена');
+      }
+    }
+    fetchUserData();
+
+  }, [])
+
 
   return (
     <div className={styles.pageWrapper}>

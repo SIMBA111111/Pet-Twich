@@ -1,10 +1,13 @@
 import { Dispatch, SetStateAction } from "react";
 
-export const getWsViewersCount = async (streamId: string, setViewersCount: Dispatch<SetStateAction<number>>): Promise<WebSocket> => {
-  const ws = new WebSocket(`ws://localhost:8080/ws/streams/${streamId}`);
-  
+export const getWsViewersCount = async (streamId: string, setViewersCount: Dispatch<SetStateAction<number>>, username: any): Promise<WebSocket> => {
+  const ws = new WebSocket(`ws://localhost:8080/ws/streams/${username.username}/${streamId}`);
+
   ws.onopen = () => {
     console.log('Юзер подключен к плееру');
+    // console.log(username);
+    
+    // ws.send(JSON.stringify({ type: 'setUsername', username: username.username }));
   };
 
   ws.onclose = () => {

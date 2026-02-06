@@ -22,7 +22,7 @@ export const Chat: React.FC<IChat> = ({streamId, userData}) => {
 
     useEffect(() => {
         const getWs = async () => {
-            const ws = await getWsChat(streamId)
+            const ws = await getWsChat(streamId, userData.username)
             webSocketRef.current = ws
         }
                 

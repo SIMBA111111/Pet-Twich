@@ -25,7 +25,7 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
 
     return (
         <div className={styles.pageWrapper}>
-            <PlayerWidget streamId={id}/>
+            <PlayerWidget streamId={id} username={userData}/>
             <Chat streamId={id} userData={userData}/>
         </div>
     )

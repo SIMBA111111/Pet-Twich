@@ -1,7 +1,7 @@
 import styles from '../ui/styles.module.scss'
 
-export const getWsChat = async (streamId: string): Promise<WebSocket> => {
-  const ws = new WebSocket(`ws://localhost:8080/ws/streams/${streamId}/chat`);
+export const getWsChat = async (streamId: string, username: string): Promise<WebSocket> => {
+  const ws = new WebSocket(`ws://localhost:8080/ws/streams/${streamId}/chat/${username}`);
   
   ws.onopen = () => {
     console.log('Юзер подключен к чатау');

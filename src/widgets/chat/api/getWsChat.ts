@@ -1,37 +1,28 @@
-import styles from '../ui/styles.module.scss'
-
+// api/getWsChat.ts
 export const getWsChat = async (streamId: string, username: string): Promise<WebSocket> => {
-  const ws = new WebSocket(`ws://localhost:8080/ws/streams/${streamId}/chat/${username}`);
-  
-  ws.onopen = () => {
-    console.log('Юзер подключен к чатау');
-  };
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://localhost:8080/ws/streams/${streamId}/chat/${username}`);
+    
+    ws.onopen = () => {
+      console.log('✅ Юзер подключен к чату');
+      resolve(ws); // Разрешаем промис только после успешного открытия соединения
+    };
 
-  ws.onclose = () => {
-    console.log('Юзер отключился от чата');
-    ws.close()
-  };
+    ws.onerror = (error) => {
+      console.error('❌ WebSocket чат ошибка:', error);
+      reject(error);
+    };
 
-  ws.onerror = (error) => {
-    console.error('Юзер WebSocket чат ошибка:', error);
-    ws.close()
-  };
+    // Устанавливаем таймаут на случай, если соединение не открывается
+    const timeout = setTimeout(() => {
+      reject(new Error('WebSocket connection timeout'));
+    }, 5000);
 
-  ws.onmessage = (event: MessageEvent) => {
-    try {
-        const data = JSON.parse(event.data);
-
-        if (data.type === "chatMessage") {
-          
-            const chatList = document.getElementById('chat')
-
-            if(chatList)
-              chatList.innerHTML += `<li class=${styles.chatMessage}>${data.senderUsername}: ${data.message}</li>`;
-        }
-    } catch (error) {
-      console.error('Ошибка при получении количества зрителей:', error);
-    }
-  };
-
-  return ws
+    // Очищаем таймаут при успешном открытии
+    ws.onopen = () => {
+      clearTimeout(timeout);
+      console.log('✅ Юзер подключен к чату');
+      resolve(ws);
+    };
+  });
 };

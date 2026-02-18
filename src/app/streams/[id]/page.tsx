@@ -10,8 +10,6 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
     // Дожидаемся разрешения Promise
     const { id } = await params;
 
-    console.log('id = ', id );
-
     const cookieStore = await cookies()
 
     const cookie = cookieStore.get('userData')?.value
@@ -24,8 +22,21 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
 
     return (
         <div className={styles.pageWrapper}>
-            <PlayerWidget streamId={id} username={userData}/>
-            <Chat streamId={id} userData={userData}/>
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    <h1 className={styles.title}>📺 Прямой эфир</h1>
+                    <p className={styles.subtitle}>Смотрите трансляцию и общайтесь в чате</p>
+                </div>
+                
+                <div className={styles.contentGrid}>
+                    <div className={styles.playerSection}>
+                        <PlayerWidget streamId={id} username={userData}/>
+                    </div>
+                    <div className={styles.chatSection}>
+                        <Chat streamId={id} userData={userData}/>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

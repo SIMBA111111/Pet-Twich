@@ -32,13 +32,12 @@ export const PlayerWidget: React.FC<IPlayerWidget> = ({ streamId, username }) =>
                 setDuration(data.time)
             }
         }
-        // console.log('username +++ ', username);
         
         // Получаем текущий поток
         fetch(BACKEND_URL + `/api/streams/${streamId}`, {
             method: 'POST',
               headers: {
-                'Content-Type': 'application/json' // добавляем заголовок
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({username: username.username})
         })
@@ -58,27 +57,100 @@ export const PlayerWidget: React.FC<IPlayerWidget> = ({ streamId, username }) =>
         // Очистка при размонтировании компонента
         return () => {
             es.close()
-            console.log('username.username ()()()() ', username.username);
-            
             wsPromise.then((ws) => ws.close(1000, 'slkdjflksdjfklj'))
         }
     }, [streamId])
 
-    console.log('currentStream = ', currentStream);
-    
-
     if (!currentStream) {
-        return 'wait...'
+        return (
+            <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
+                <p>Загрузка трансляции...</p>
+            </div>
+        )
     }
 
+    // const formatDuration = (seconds: number) => {
+    //     const hours = Math.floor(seconds / 3600)
+    //     const minutes = Math.floor((seconds % 3600) / 60)
+    //     const secs = seconds % 60
+    //     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    // }
+
     return (
-        <div className={styles.playerContainer}>
-            <div className={styles.header}>
-                <h1 className={styles.headerH1}>👁️ Просмотр трансляции</h1>
-                <p>Смотрите прямую трансляцию в реальном времени</p>
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                {/* <div className={styles.header}>
+                    <h1 className={styles.title}>📺 Просмотр трансляции</h1>
+                    <p className={styles.subtitle}>Смотрите прямую трансляцию в реальном времени</p>
+                </div> */}
+
+                <div className={styles.playerCard}>
+                    <div className={styles.streamPreview}>
+                        <div className={styles.previewOverlay}>
+                            <span className={styles.liveBadge}>LIVE</span>
+                            <div className={styles.streamStats}>
+                                <span className={styles.viewerCount}>
+                                    👁️ {viewersCount} зрителей
+                                </span>
+                                {/* <span className={styles.duration}>
+                                    ⏱️ {formatDuration(duration)}
+                                </span> */}
+                            </div>
+                        </div>
+                        <Player 
+                            playlistUrl={STREAM_HOST + '/' + currentStream.stream_key + '/index.m3u8'} 
+                            isLiveStream={true} 
+                            duration={duration} 
+                        />
+                    </div>
+
+                    {/* <div className={styles.streamInfo}>
+                        <div className={styles.streamerAvatar}>
+                            {currentStream.user?.avatar ? (
+                                <img 
+                                    src={currentStream.user.avatar} 
+                                    alt={currentStream.user.username}
+                                    className={styles.avatarImage}
+                                />
+                            ) : (
+                                <div className={styles.avatarPlaceholder}>
+                                    {currentStream.user?.username?.charAt(0).toUpperCase() || 'S'}
+                                </div>
+                            )}
+                        </div>
+                        <div className={styles.streamDetails}>
+                            <h2 className={styles.streamTitle}>
+                                {currentStream.title || 'Без названия'}
+                            </h2>
+                            <div className={styles.streamMeta}>
+                                <span className={styles.streamerName}>
+                                    {currentStream.user?.username || 'Неизвестный стример'}
+                                </span>
+                                {currentStream.game && (
+                                    <span className={styles.gameTag}>
+                                        🎮 {currentStream.game}
+                                    </span>
+                                )}
+                            </div>
+                            {currentStream.tags && currentStream.tags.length > 0 && (
+                                <div className={styles.tagsList}>
+                                    {currentStream.tags.map((tag: string, index: number) => (
+                                        <span key={index} className={styles.tag}>
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                            {currentStream.description && (
+                                <p className={styles.streamDescription}>
+                                    {currentStream.description}
+                                </p>
+                            )}
+                        </div>
+                    </div> */}
+                </div>
             </div>
-            <Player playlistUrl={STREAM_HOST + '/' + currentStream.stream_key + '/index.m3u8'} isLiveStream={true} duration={duration} />
-            <div className={styles.viewersCount}>Зрителей: {viewersCount}</div>
         </div>
     )
 }

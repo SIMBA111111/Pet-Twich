@@ -14,6 +14,8 @@ interface IPlayerWidget {
 }
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+const STREAM_HOST = process.env.NEXT_PUBLIC_STREAM_HOST
+
 
 export const PlayerWidget: React.FC<IPlayerWidget> = ({ streamId, username }) => {
     const [duration, setDuration] = useState<number>(0)
@@ -42,7 +44,7 @@ export const PlayerWidget: React.FC<IPlayerWidget> = ({ streamId, username }) =>
         })
             .then((response) => response.json())
             .then((data) => {
-                setCurrentStream(data)
+                setCurrentStream(data.data)
             })
 
         // Инициируем WebSocket для просмотра
@@ -62,6 +64,9 @@ export const PlayerWidget: React.FC<IPlayerWidget> = ({ streamId, username }) =>
         }
     }, [streamId])
 
+    console.log('currentStream = ', currentStream);
+    
+
     if (!currentStream) {
         return 'wait...'
     }
@@ -72,7 +77,7 @@ export const PlayerWidget: React.FC<IPlayerWidget> = ({ streamId, username }) =>
                 <h1 className={styles.headerH1}>👁️ Просмотр трансляции</h1>
                 <p>Смотрите прямую трансляцию в реальном времени</p>
             </div>
-            <Player playlistUrl={currentStream.streamUrl} isLiveStream={true} duration={duration} />
+            <Player playlistUrl={STREAM_HOST + '/' + currentStream.stream_key + '/index.m3u8'} isLiveStream={true} duration={duration} />
             <div className={styles.viewersCount}>Зрителей: {viewersCount}</div>
         </div>
     )

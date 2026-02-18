@@ -22,7 +22,6 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
         userData = JSON.parse(cookie)
     }
 
-
     return (
         <div className={styles.pageWrapper}>
             <PlayerWidget streamId={id} username={userData}/>
